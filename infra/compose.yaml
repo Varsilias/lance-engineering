@@ -1,0 +1,80 @@
+name: lance-engineering
+
+services:
+  postgres:
+    image: postgres:16.2
+    container_name: lance-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lance-db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - lance-network
+    ports:
+      - "5432:5432"
+
+  wallet-service-api:
+    container_name: wallet-api
+    build:
+      context: ../wallet-service/api
+      dockerfile: Dockerfile
+      target: base
+    env_file:
+      - ../wallet-service/api/.env
+    ports:
+      - "7000:7000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - lance-network
+    volumes:
+      - ../wallet-service/api:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev
+
+  wallet-service-app:
+    container_name: wallet-app
+    build:
+      context: ../wallet-service/app
+      dockerfile: Dockerfile
+      target: base
+    env_file:
+      - ../wallet-service/app/.env
+    environment:
+    - PORT=4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - wallet-service-api
+    networks:
+      - lance-network
+    volumes:
+      - ../wallet-service/app:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run dev
+
+  proxy:
+    image: nginx:alpine
+    container_name: lance-proxy
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - wallet-service-api
+      - wallet-service-app
+    networks:
+      - lance-network
+
+volumes:
+  postgres-data:
+  nginx-logs:
+
+networks:
+  lance-network:
+    driver: bridge

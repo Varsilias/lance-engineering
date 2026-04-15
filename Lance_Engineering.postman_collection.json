@@ -1,0 +1,347 @@
+{
+  "info": {
+    "_postman_id": "9daf2ef8-b08f-43f9-8481-34a8f8b47b99",
+    "name": "Lance Engineering",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "10967402"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Profile",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{nest_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/auth/me",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Wallets",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{nest_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/wallet/list",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "wallet",
+            "list"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Balance",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{nest_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/wallet/5f866f67-d075-45fd-89db-b11f298b6a64/balance",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "wallet",
+            "5f866f67-d075-45fd-89db-b11f298b6a64",
+            "balance"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Transaction History",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{nest_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/wallet/5251a420-a6df-43c0-8fdf-b2647ab27e03/transactions?limit=20&cursor=2026-04-13 11:21:22.551",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "wallet",
+            "5251a420-a6df-43c0-8fdf-b2647ab27e03",
+            "transactions"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "20"
+            },
+            {
+              "key": "cursor",
+              "value": "2026-04-13 11:21:22.551"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Account",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Lance Engineering\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/users",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Deposit Funds",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{nest_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"user_id\": \"5251a420-a6df-43c0-8fdf-b2647ab27e03\",\n    \"amount\": 25000,\n    \"reference\": \"3fd6a3a8-3ed9-4338-a62c-1cdf566090ae\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/wallet/deposit",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "wallet",
+            "deposit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Transfer Funds",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{nest_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"from_account_id\": \"b804401a-5d2c-4114-96c4-0f8dd59445db\",\n    \"to_account_id\": \"61cc11b4-6c26-482f-8255-e75309986735\",\n    \"amount\": 1000,\n    \"reference\": \"trx_5f866f67-d075-43c0-8fdf-b2647ab27e07\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/wallet/transfer",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "wallet",
+            "transfer"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Register",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const response = pm.response.json();",
+              "",
+              "if (response.data && response.data.access_token) {",
+              "    pm.environment.set(\"nest_user\", response.data.access_token);",
+              "}",
+              "",
+              "if (response.data && response.data.refresh_token) {",
+              "    pm.environment.set(\"refresh_token\", response.data.refresh_token);",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"first_name\": \"Daniel\",\n    \"last_name\": \"Okoronkwo\",\n    \"email\": \"daniel@example.com\",\n    \"password\": \"P@ssword1234\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/register",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const response = pm.response.json();",
+              "",
+              "if (response.data && response.data.access_token) {",
+              "    pm.environment.set(\"nest_user\", response.data.access_token);",
+              "}",
+              "",
+              "if (response.data && response.data.refresh_token) {",
+              "    pm.environment.set(\"refresh_token\", response.data.refresh_token);",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"daniel@example.com\",\n    \"password\": \"P@ssword1234\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
