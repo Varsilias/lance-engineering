@@ -53,12 +53,11 @@
 11. [Trade-offs & Decisions](#trade-offs--decisions)  
 
 12. [Scaling Considerations](#scaling-considerations)  
-    - [Database Scaling](#database-scaling)  
-    - [Write Scaling](#write-scaling)  
-    - [Caching Strategy](#caching-strategy)  
-    - [Idempotency at Scale](#idempotency-at-scale)  
-    - [API Scaling](#api-scaling)  
-    - [Observability](#observability)  
+    - [Starting Point (Current Implementation)](#1-starting-point-current-implementation)  
+    - [Intermediate Scaling (Practical Optimisations)](#2-intermediate-scaling-practical-optimisations)  
+    - [Advanced Scaling (High Throughput System)](#3-advanced-scaling-high-throughput-system)  
+    - [Observability & Monitoring](#4-observability--monitoring)  
+    - [Final Thoughts](#final-thoughts)    
 
 13. [Monitoring & Observability](#monitoring--observability)  
 
@@ -160,6 +159,8 @@ This approach ensures:
 
 
 #### Data Model Overview
+![Data Model diagram](https://github.com/Varsilias/lance-engineering/blob/main/diagrams/data-model.png)
+
 
 Core entities:
 
@@ -411,39 +412,189 @@ This implementation intentionally prioritizes correctness, clarity, and simplici
 ---
 
 ## Scaling Considerations
-#### Database Scaling
-- Table partitioning
-- Index tuning
-- Read replicas
-#### Write Scaling
-- Queue-based processing
-- Event-driven architecture
 
-#### Caching Strategy
-- Cache derived balances
-- Invalidate on write
+Scaling a financial system is not just about handling more traffic, it is about doing so without compromising correctness. The system must continue to guarantee that balances are accurate, transactions are atomic, and no form of double spending is possible even under heavy load.
+
+Rather than jumping straight to complex architectures, it is more practical to think about scaling in stages.
+
+
+### 1. Starting Point (Current Implementation)
+
+The current implementation is intentionally simple and strongly consistent.
+
+- A single PostgreSQL instance
+- Ledger-based balance computation
+- Synchronous request handling
+- No caching layer
+- Direct database reads for balance and transaction history
+
+This approach prioritizes correctness and clarity. Every request is processed in real time, and balances are always derived from the source of truth (ledger entries).
+
+**Limitations:**
+- As traffic increases, database reads (especially balance aggregation) become expensive
+- Write contention increases with concurrent transfers
+- The system is vertically scalable but not horizontally resilient
+- Latency increases as load grows
+
+This setup works well for low to moderate traffic but will struggle at tens of millions of transactions per day.
+
+
+### 2. Intermediate Scaling (Practical Optimisations)
+
+At this stage, the goal is to improve performance without fundamentally changing the system design.
+
+#### Database Optimisation
+
+The first step is to make the database more efficient:
+
+- **Indexing**  
+  Add indexes on frequently queried fields such as `wallet_id`, `created_at`, and `reference`. This improves read performance significantly.
+
+- **Read Replicas**  
+  Introduce read replicas to offload read-heavy operations such as transaction history and balance queries.  
+  Trade-off: Slight replication lag, meaning reads may not always reflect the most recent writes.
+
+- **Connection Pooling**  
+  Prevent database overload by controlling concurrent connections.
+
+
+#### Caching Layer
+
+Balances are computed from ledger entries, which becomes expensive over time.
+
+- Introduce a cache (e.g., Redis) for derived values like wallet balance
+- Update or invalidate cache on every write operation
+
+Trade-offs:
+- Cache invalidation adds complexity
+- Slight risk of stale reads if not handled carefully
+- Additional infrastructure cost
+
 
 #### Idempotency at Scale
-- Redis-backed idempotency store
+
+- Move idempotency checks to Redis instead of relying solely on database constraints
+- This reduces database contention for duplicate requests
+
+Trade-off:
+- Adds operational complexity
+- Requires careful synchronization with database writes
+
 
 #### API Scaling
-- Horizontal scaling to handle more request
-- Load balancing
 
-#### Observability
-- Logging
-- Metrics
-- Distributed tracing(if we scale to a Distributed environment)
----
-## Monitoring & Observability
-- Structured logs(preferrably in json format for easy querying)
-- Error tracking
-- Performance monitoring using observability tools
+- Deploy multiple instances of the API behind a load balancer
+- Ensure statelessness (already achieved with JWT)
+
+Trade-off:
+- Requires proper request routing and monitoring
+- Debugging becomes slightly more complex in distributed setups
+
+
+### 3. Advanced Scaling (High Throughput System)
+
+At this stage, the system is expected to handle millions of transactions per day reliably.
+
+#### Asynchronous Processing (Queues)
+
+Instead of processing every transaction synchronously:
+
+- Introduce a queue (e.g., Kafka, RabbitMQ)
+- Write requests enqueue transaction jobs
+- Workers process them sequentially or in controlled parallelism
+
+Benefits:
+- Smooths traffic spikes
+- Prevents database overload
+- Improves system resilience
+
+Trade-offs:
+- Increased system complexity
+- Eventual consistency (client may not see immediate result)
+- Requires retry and failure handling logic
+
+
+#### Ledger Table Partitioning
+
+As the ledger grows:
+
+- Partition tables by time (e.g., monthly) or wallet_id
+
+Benefits:
+- Faster queries on smaller partitions
+- Improved write performance
+
+Trade-offs:
+- More complex query logic
+- Maintenance overhead
+
+
+#### Balance Snapshots
+
+Instead of always computing balance from scratch:
+
+- Maintain periodic balance snapshots
+- Compute recent changes on top of snapshot
+
+Benefits:
+- Faster balance queries
+- Reduced computation cost
+
+Trade-offs:
+- Additional logic for maintaining snapshots
+- Slight complexity in ensuring correctness
+
+
+#### Distributed Locking
+
+For concurrency across multiple instances:
+
+- Use distributed locks (e.g., Redis-based locks)
+
+Trade-offs:
+- Adds latency
+- Requires careful handling to avoid deadlocks or lock leaks
+
+
+### 4. Observability & Monitoring
+
+As the system scales, visibility becomes critical.
+
+- **Structured Logging**  
+  Logs in JSON format for easier querying
+
+- **Metrics**  
+  Track latency, error rates, transaction throughput
+
+- **Tracing**  
+  Understand request flow across services
+
+Trade-offs:
+- Additional cost for monitoring tools
+- Slight performance overhead
+
+
+### Final Thoughts
+
+The ideal production system is not a single approach but a combination of strategies:
+
+- Strong consistency at the core (ledger + transactions)
+- Caching for performance where safe
+- Asynchronous processing for scalability
+- Horizontal scaling at the API layer
+- Observability for operational confidence
+
+The key is to evolve the system gradually, introducing complexity only when necessary. Premature optimisation can make systems harder to reason about, especially in financial contexts where correctness must always come first.
+
+At every stage, the guiding principle remains the same:
+
+> Scale performance without compromising correctness.
 
 ---
 ## Demo
+[Watch the video](https://youtu.be/7PBFNFI2GS8)
 
-A short demo video is included to demonstrate:
+This short demo video is included to demonstrate:
 
 - Registration
 - Deposit
