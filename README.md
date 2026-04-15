@@ -110,7 +110,7 @@ A typical deployment looks like:
 
 
 #### Request flow
-![Request flow diagram](https://github.com/Varsilias/lance-engineering/diagrams/request-flow.png)
+![Request flow diagram](https://github.com/Varsilias/lance-engineering/blob/main/diagrams/request-flow.png)
 
 **Nginx routes:**
 - `/api/*` → Backend
@@ -122,7 +122,7 @@ The backend processes requests using transactional guarantees where necessary an
 ## Authentication Flow
 
 Authentication is implemented using JWT.
-![Authentication flow diagram](https://github.com/Varsilias/lance-engineering/diagrams/auth-flow.png)
+![Authentication flow diagram](https://github.com/Varsilias/lance-engineering/blob/main/diagrams/auth-flow.png)
 
 The token contains the user identifier and is validated on every protected request.
 
@@ -323,7 +323,7 @@ Example:
 - Pages (auth, dashboard)
 
 #### Data Flow
-![Data flow diagram](https://github.com/Varsilias/lance-engineering/diagrams/data-flow.png)
+![Data flow diagram](https://github.com/Varsilias/lance-engineering/blob/main/diagrams/data-flow.png)
 
 #### Error Handling
 Errors are normalized at API layer and surfaced as human-readable messages.
