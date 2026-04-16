@@ -41,6 +41,9 @@
    - [Error Handling](#error-handling)  
 
 9. [Development Environment & Setup](#development-environment--setup)  
+   - [Tools you should have installed on your local machine](#tools-you-should-have-installed-on-your-local-machine)
+   - [Environment Setup](#environment-setup)
+   - [Cloning this Project](#cloning-this-project)
    - [Project Structure](#project-structure)  
    - [Docker Setup](#docker-setup)  
    - [Running the Project](#running-the-project)  
@@ -332,6 +335,27 @@ Errors are normalized at API layer and surfaced as human-readable messages.
 ---
 
 ## Development Environment & Setup
+#### Tools you should have installed on your local machine
+- Docker + docker-compose(docker compose comes auto installed when you install Docker)
+- Node.js >=20
+- NPM(comes automatically installed with Node.js)
+- Git
+
+You should also ensure that the following ports are free on your local machine
+- **3000**
+- **4000**
+- **7000**
+
+#### Environment Setup
+I intentionally committed the environment variables for easy bootstrapping of this project.
+
+#### Cloning this Project
+1. Clone the project down to you local machine `git clone git@github.com:Varsilias/lance-engineering.git`
+2. Inside the root directory run `cd wallet-service/api && npm install`
+3. After step 2, run `cd ../../`
+4. Now you are back into your root directory run `cd wallet-service/app && npm install`
+5. Run the command in step 3 again
+6. Run the command [here](#running-the-project) to start the project
 
 #### Project Structure
 ```txt
@@ -339,6 +363,10 @@ Errors are normalized at API layer and surfaced as human-readable messages.
   /api
   /app
 /infra
+/diagrams
+Lance_Engineering.postman_collection.json # Postman Collection
+Makefile
+README.md #Project Docs
 ```
 #### Docker Setup
 
